@@ -240,15 +240,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ),
                     );
-
-                    return ListTile(
-                      dense: true,
-                      title: Text(emergencyContacts[index]['name']),
-                      subtitle: Text(
-                        emergencyContacts[index]['number'],
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    );
                   },
                 ),
               ],
