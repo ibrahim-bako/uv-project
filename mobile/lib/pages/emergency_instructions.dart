@@ -192,10 +192,12 @@ class EmergencyInstructionsDetails extends StatelessWidget {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(instruction.title),
+        title: Text(instruction.title, maxLines: 2,),
       ),
       body: Markdown(
         data: instruction.content,
+        softLineBreak: true,
+        
       ),
     );
   }

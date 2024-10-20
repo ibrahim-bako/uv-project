@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:mobile/pages/emergency_instructions.dart';
 import 'package:mobile/pages/locations.dart';
+import 'package:mobile/utils.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -132,7 +136,6 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                             onPressed: () {
-                              // TODO: Implement onPressed
                               showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
@@ -142,45 +145,77 @@ class _HomePageState extends State<HomePage> {
                                     content: SingleChildScrollView(
                                       child: ListBody(
                                         children: <Widget>[
-                                          ListTile(
-                                            title: const Text('Incendie'),
-                                            onTap: () {
-                                              // Handle fire emergency
-                                              Navigator.of(context).pop();
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                      'Alerte envoyée avec succès'),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          ListTile(
-                                            title: const Text('Médicale'),
-                                            onTap: () {
-                                              // Handle medical emergency
-                                              Navigator.of(context).pop();
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                      'Alerte envoyée avec succès'),
-                                                ),
-                                              );
-                                            },
-                                          ),
-                                          ListTile(
-                                            title: const Text('Sécurité'),
-                                            onTap: () {
-                                              // Handle security emergency
-                                              Navigator.of(context).pop();
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                  content: Text(
-                                                      'Alerte envoyée avec succès'),
-                                                ),
+                                          ...[
+                                            "Accident de la route",
+                                            "Grave chute",
+                                            "Incendie ou brullure grave",
+                                            "Autres"
+                                          ].map(
+                                            (emergencyType) {
+                                              return ListTile(
+                                                title: Text(emergencyType),
+                                                onTap: () async {
+                                                  // Handle emergencyType
+
+                                                  Position currentPosition =
+                                                      await determinePosition();
+                                                  FirebaseFirestore.instance
+                                                      .collection("hospitals")
+                                                      .get()
+                                                      .then(
+                                                    (QuerySnapshot
+                                                        querySnapshot) {
+                                                      List<HospitalData>
+                                                          hospitals =
+                                                          querySnapshot.docs
+                                                              .map(
+                                                        (doc) {
+                                                          return HospitalData(
+                                                            name: doc['name'],
+                                                            description: doc[
+                                                                'description'],
+                                                            location: LatLng(
+                                                                doc['location']
+                                                                    .latitude,
+                                                                doc['location']
+                                                                    .longitude),
+                                                          );
+                                                        },
+                                                      ).toList();
+
+                                                      double currentDistance = double.infinity;
+                                                      late HospitalData nearestHospital;
+
+                                                      for (var hospital in hospitals) {
+                                                        double distance = calculateDistance(
+                                                            hospital.location
+                                                                .latitude,
+                                                            hospital.location
+                                                                .longitude,
+                                                            currentPosition
+                                                                .latitude,
+                                                            currentPosition
+                                                                .longitude);
+                                                                if(distance < currentDistance){
+                                                                  currentDistance = distance;
+                                                                  nearestHospital = hospital;
+                                                                }
+                                                      }
+
+                                                      // TODO: Send alert to nearest hospital
+                                                      debugPrint(nearestHospital.name);
+                                                    },
+                                                  );
+
+                                                  Navigator.of(context).pop();
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text(
+                                                          'Alerte envoyée avec succès'),
+                                                    ),
+                                                  );
+                                                },
                                               );
                                             },
                                           ),
