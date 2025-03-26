@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mobile/pages/emergency_instructions.dart';
 import 'package:mobile/pages/locations.dart';
 import 'package:mobile/utils.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -183,27 +185,37 @@ class _HomePageState extends State<HomePage> {
                                                         },
                                                       ).toList();
 
-                                                      double currentDistance = double.infinity;
-                                                      late HospitalData nearestHospital;
+                                                      double currentDistance =
+                                                          double.infinity;
+                                                      late HospitalData
+                                                          nearestHospital;
 
-                                                      for (var hospital in hospitals) {
-                                                        double distance = calculateDistance(
-                                                            hospital.location
-                                                                .latitude,
-                                                            hospital.location
-                                                                .longitude,
-                                                            currentPosition
-                                                                .latitude,
-                                                            currentPosition
-                                                                .longitude);
-                                                                if(distance < currentDistance){
-                                                                  currentDistance = distance;
-                                                                  nearestHospital = hospital;
-                                                                }
+                                                      for (var hospital
+                                                          in hospitals) {
+                                                        double distance =
+                                                            calculateDistance(
+                                                                hospital
+                                                                    .location
+                                                                    .latitude,
+                                                                hospital
+                                                                    .location
+                                                                    .longitude,
+                                                                currentPosition
+                                                                    .latitude,
+                                                                currentPosition
+                                                                    .longitude);
+                                                        if (distance <
+                                                            currentDistance) {
+                                                          currentDistance =
+                                                              distance;
+                                                          nearestHospital =
+                                                              hospital;
+                                                        }
                                                       }
 
                                                       // TODO: Send alert to nearest hospital
-                                                      debugPrint(nearestHospital.name);
+                                                      debugPrint(
+                                                          nearestHospital.name);
                                                     },
                                                   );
 
@@ -254,7 +266,19 @@ class _HomePageState extends State<HomePage> {
                   (index) {
                     return Card(
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () async {
+                          var uri = Uri.parse(
+                              "tel:${emergencyContacts[index]['number']}");
+
+                          debugPrint(uri.toString());
+
+                          await FlutterPhoneDirectCaller.callNumber(
+                              emergencyContacts[index]['number']);
+                          // debugPrint((await canLaunchUrl(uri)).toString());
+
+                          // await launchUrl(uri,
+                          //     mode: LaunchMode.externalApplication);
+                        },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(
                               vertical: 10, horizontal: 15),

@@ -19,6 +19,7 @@ dependencies:
   flutter_markdown: ^0.7.4
   geolocator: ^13.0.1
   flutter_map_location_marker: ^9.1.1
+  flutter_phone_direct_caller: ^2.1.1
 
 dev_dependencies:
   flutter_test:

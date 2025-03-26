@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -6,7 +8,7 @@ class InstructionData {
   final String title;
   final String description;
   final String imageUrl;
-  final String content;
+  final List<String> content;
   final List<String> tags;
 
   const InstructionData({
@@ -41,11 +43,13 @@ class _EmergencyInstructionsState extends State<EmergencyInstructions> {
           setState(() {
             emergencyInstructions = querySnapshot.docs.map(
               (doc) {
+                print(doc['content']);
                 return InstructionData(
                   title: doc['title'],
                   description: doc['description'],
                   imageUrl: doc['imageUrl'],
-                  content: doc['content'],
+                  content:
+                      doc['content'].map<String>((e) => e.toString()).toList(),
                   tags: List<String>.from(doc['tags']),
                 );
               },
@@ -121,7 +125,7 @@ class _EmergencyInstructionsState extends State<EmergencyInstructions> {
                               ),
                             ),
                             title: Text(
-                              "${instruction.title} $index",
+                              instruction.title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.start,
@@ -192,12 +196,22 @@ class EmergencyInstructionsDetails extends StatelessWidget {
             Navigator.of(context).pop();
           },
         ),
-        title: Text(instruction.title, maxLines: 2,),
+        title: Text(
+          instruction.title,
+          maxLines: 2,
+        ),
       ),
-      body: Markdown(
-        data: instruction.content,
-        softLineBreak: true,
-        
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          spacing: 4,
+          children: instruction.content
+              .map((e) => Text(
+                    e,
+                    style: Theme.of(context).textTheme.labelLarge,
+                  ))
+              .toList(),
+        ),
       ),
     );
   }
